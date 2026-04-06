@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkepticAI — Зеркало твоих действий</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
+        .container { max-width: 500px; width: 100%; border: 1px solid #333; padding: 20px; border-radius: 8px; background: #1a1a1a; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; text-align: center; }
+        p { color: #888; font-size: 0.9rem; text-align: center; margin-bottom: 20px; }
+        input, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 4px; border: none; box-sizing: border-box; font-size: 1rem; }
+        input { background: #2a2a2a; color: #fff; border: 1px solid #444; }
+        button { background: #3d5afe; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #536dfe; }
+        .result { margin-top: 20px; padding: 15px; border-left: 4px solid #3d5afe; background: #252525; display: none; line-height: 1.5; }
+        .action-block { margin-top: 20px; display: none; border-top: 1px solid #333; padding-top: 20px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-done { background: #4caf50; }
+        .btn-fail { background: #f44336; }
+        .step-counter { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-counter" id="stepDisplay">Сессия: Шаг 0</div>
+        <h1>SkepticAI</h1>
+        <p id="sub-header">Напиши цель. Я покажу, где ты застрял.</p>
+        
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="Например: Запустить проект...">
+            <button onclick="processInput()">Показать зеркало</button>
+        </div>
+
+        <div class="result" id="resultArea"></div>
+
+        <div class="action-block" id="actionBlock">
+            <p style="color:#fff; text-align:left;"><strong>Что ты сделаешь за 24 часа?</strong></p>
+            <input type="text" id="nextStep" placeholder="Один конкретный шаг...">
+            <div class="btn-group">
+                <button class="btn-done" onclick="completeStep(true)">Я сделал</button>
+                <button class="btn-fail" onclick="completeStep(false)">Не сделал</button>
+            </div>
+        </div>
+        
+        <div id="paymentOffer" style="display:none; margin-top:30px; padding:15px; background:#2a2000; border:1px solid #ff9800; border-radius:4px; text-align: center;">
+            <p style="color:#ff9800;"><strong>Застрял в "Не сделал"?</strong></p>
+            <p style="font-size:0.8rem; color:#ccc;">Я разберу твой случай и покажу точку торможения. Без воды.</p>
+            <button style="background: #ff9800; font-size: 0.9rem; color: #000;" onclick="window.open('https://t.me/YESTERDAY')">Диагностика за 5$</button>
+        </div>
+    </div>
+
+    <script>
+        let step = parseInt(localStorage.getItem('skepticStep')) || 0;
+        document.getElementById('stepDisplay').innerText = `Сессия: Шаг ${step}`;
+
+        function processInput() {
+            const input = document.getElementById('userInput').value.toLowerCase();
+            const resultArea = document.getElementById('resultArea');
+            let message = "Ты уверен, что это твоя настоящая цель, а не просто красивая фраза для успокоения совести?";
+
+            const logic = [
+                { t: /деньги|заработать|доход|бизнес/i, m: "Ты говоришь 'хочу заработать', но твои действия — это только сбор информации. Где именно ты остановил реальный запуск? Что мешает продать прямо сейчас?" },
+                { t: /цель|план|жизнь|измени/i, m: "Ты хочешь перемен, но твой сегодняшний день — копия вчерашнего. Назови хотя бы одно действие, которое выбивается из твоей привычной программы." },
+                { t: /не могу|прокраст|лен/i, m: "Ты говоришь 'не могу'. Но давай честно: ты пробовал системно (хотя бы 5 дней подряд) или сдался после первого дискомфорта? Где точка сброса?" }
+            ];
+
+            for (let item of logic) {
+                if (item.t.test(input)) { message = item.m; break; }
+            }
+
+            resultArea.innerHTML = `<strong>Зеркало:</strong><br>${message}`;
+            resultArea.style.display = 'block';
+            document.getElementById('actionBlock').style.display = 'block';
+            document.getElementById('input-area').style.display = 'none';
+            document.getElementById('sub-header').style.display = 'none';
+        }
+
+        function completeStep(success) {
+            if (success) {
+                step++;
+                localStorage.setItem('skepticStep', step);
+                alert("Энергия пошла в дело. Шаг зафиксирован. Вернись завтра за вторым.");
+                location.reload();
+            } else {
+                document.getElementById('paymentOffer').style.display = 'block';
+                alert("Честный ответ. Но за ним стоит выбор остаться прежним. Почему ты выбрал комфорт вместо цели?");
+            }
+        }
+    </script>
+</body>
+</html>
